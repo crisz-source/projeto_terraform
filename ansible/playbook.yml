@@ -1,0 +1,80 @@
+---
+- name: Configurar servidor e rodar aplicacao
+  hosts: webservers
+  become: yes
+  vars:
+    app_name: "minha-app"
+    app_port: 80
+
+  tasks:
+    - name: Atualizar cache do apt
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Instalar dependencias
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+        state: present
+
+    - name: Adicionar chave GPG do Docker
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Adicionar repositorio Docker
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Instalar Docker
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
+        update_cache: yes
+
+    - name: Iniciar Docker
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Criar diretorio da aplicacao
+      file:
+        path: /var/www/html
+        state: directory
+        mode: '0755'
+
+    - name: Copiar pagina da aplicacao
+      template:
+        src: templates/index.html.j2
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Rodar container Nginx
+      docker_container:
+        name: "{{ app_name }}"
+        image: nginx:latest
+        state: started
+        restart_policy: always
+        ports:
+          - "{{ app_port }}:80"
+        volumes:
+          - /var/www/html:/usr/share/nginx/html:ro
+
+    - name: Verificar container
+      command: docker ps --filter name={{ app_name }} --format "{{ '{{' }}.Names{{ '}}' }} - {{ '{{' }}.Status{{ '}}' }}"
+      register: container_status
+      changed_when: false
+
+    - name: Mostrar status
+      debug:
+        msg: "{{ container_status.stdout }}"

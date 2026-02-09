@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Projeto Final - DevOps</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 { color: #333; }
+        .info { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>🚀 Projeto Final - DevOps</h1>
+    <div class="info">
+        <h2 class="success">Deploy realizado com sucesso!</h2>
+        <p><strong>Hostname:</strong> {{ ansible_hostname }}</p>
+        <p><strong>IP:</strong> {{ ansible_default_ipv4.address }}</p>
+        <p><strong>Sistema:</strong> {{ ansible_distribution }} {{ ansible_distribution_version }}</p>
+        <p><strong>Data:</strong> {{ ansible_date_time.iso8601 }}</p>
+        <hr>
+        <p><strong>Stack utilizada:</strong></p>
+        <ul>
+            <li>Terraform - Infraestrutura no Azure</li>
+            <li>Ansible - Configuracao do servidor</li>
+            <li>Docker - Container da aplicacao</li>
+            <li>Nginx - Servidor web</li>
+        </ul>
+    </div>
+</body>
+</html>
